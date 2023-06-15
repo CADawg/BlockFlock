@@ -1,0 +1,6 @@
+{
+  "domain": "engine.dbuidl.com",
+  "node": "https://engine.rishipanthee.com/",
+  "blockchainEndpoint": "/blockchain",
+  "contractsEndpoint": "/contracts"
+}
