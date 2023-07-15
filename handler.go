@@ -73,7 +73,8 @@ func HandleOneRequest(request JSONRPCRequest, endpoint string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid request %w", err)
 	}
 
-	if request.Method == "getBlockInfo" {
+	// Check if it is a getBlockInfo request
+	if getBlockInfo.IsMethod(request.Method) {
 		// check our cache
 		value, err := ReadCacheForBlock(request)
 
