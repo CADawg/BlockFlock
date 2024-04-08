@@ -1,6 +1,6 @@
 module github.com/CADawg/BlockFlock
 
-go 1.20
+go 1.22
 
 require (
 	github.com/cfoxon/hiveenginego v0.0.0-20230511142503-2771bb8a63da
