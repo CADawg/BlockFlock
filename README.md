@@ -1,7 +1,5 @@
 # BlockFlock
 
-![](https://raw.githubusercontent.com/CADawg/BlockFlock/main/assets/blockflock.png)
-
 BlockFlock is a simple caching layer compatible with the Hive-Engine protocol. It is designed to be used in front of a classic Hive Engine node.
 
 ## What does it cache?
