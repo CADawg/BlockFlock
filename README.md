@@ -2,6 +2,20 @@
 
 BlockFlock is a simple caching layer compatible with the Hive-Engine protocol. It is designed to be used in front of a classic Hive Engine node.
 
+## Build and Install
+
+You will need Go 1.22+ installed.
+
+```shell
+git clone https://github.com/CADawg/BlockFlock
+cd BlockFlock
+go build
+cp config.example.json config.json
+./BlockFlock
+# Or if you want to automatically download blocks over time
+./BlockFlock auto
+```
+
 ## What does it cache?
 
 It caches only one call, `getBlockInfo`. This is because it takes a fair time to request and the data doesn't change once it's set. Otherwise, it pipes the request straight through to the real hive engine node.

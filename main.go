@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -22,8 +23,20 @@ var db *badger.DB
 var configuration *config.Config
 var err error
 var upstreamProvider *upstream.Upstream
+var latestSafeBlock int64
 
 func main() {
+	// get args
+	args := os.Args[1:]
+
+	if len(args) > 0 {
+		if args[0] == "auto" {
+			go CacheOverTime()
+		} else {
+			go GetLatestSafeBlock()
+		}
+	}
+
 	configuration, err = config.LoadConfig("./config.json")
 
 	if err != nil {
@@ -131,7 +144,7 @@ func HandleRequests(res http.ResponseWriter, req *http.Request, endpoint string)
 		return
 	}
 
-	responses, err := upstreamProvider.HandleRequests(reqs)
+	responses, err := upstreamProvider.HandleRequests(reqs, latestSafeBlock)
 
 	if err != nil {
 		SendError(res, 0, err, -69)
@@ -162,4 +175,81 @@ func SendCorsHeaders(res http.ResponseWriter) {
 	res.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 	res.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	res.Header().Set("Access-Control-Max-Age", "86400")
+}
+
+func GetLatestSafeBlock() {
+	for {
+		time.Sleep(time.Second * 3)
+
+		resp, err := jsonrpc.JsonGet[hive_engine.NodeInfo](configuration.Node)
+
+		if err == nil {
+			latestSafeBlock = resp.LastVerifiedBlockNumber
+		}
+	}
+}
+
+func CacheOverTime() {
+	// get min block from db
+	var minBlock int64 = 0
+
+	err := db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 10
+		opts.PrefetchValues = false
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			if strings.HasPrefix(string(k), "b_") {
+				var blockNumber, err = strconv.ParseInt(strings.TrimPrefix(string(k), "b_"), 10, 64)
+
+				if err != nil {
+					return err
+				}
+
+				if blockNumber < minBlock {
+					minBlock = blockNumber
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	for {
+		time.Sleep(time.Second * 3)
+
+		resp, err := jsonrpc.JsonGet[hive_engine.NodeInfo](configuration.Node)
+
+		if err != nil {
+			panic(err)
+		}
+
+		latestSafeBlock = resp.LastVerifiedBlockNumber
+
+		var i int64
+
+		for i = minBlock; i <= latestSafeBlock; i++ {
+			time.Sleep(time.Millisecond * 100)
+
+			_, err := upstreamProvider.HandleRequests([]jsonrpc.Request{
+				{
+					Method: "blockchain.getBlockInfo",
+					Params: json.RawMessage(fmt.Sprintf(`{"blockNumber":%d}`, i)),
+					Single: true,
+				},
+			}, latestSafeBlock)
+
+			if err != nil {
+				i--
+				continue
+			}
+		}
+
+	}
 }

@@ -22,7 +22,7 @@ func NewUpstream(cache cache.Cache, node string) *Upstream {
 	}
 }
 
-func (u *Upstream) HandleRequests(requests []jsonrpc.Request) ([]jsonrpc.Response, error) {
+func (u *Upstream) HandleRequests(requests []jsonrpc.Request, latestSafeBlock int64) ([]jsonrpc.Response, error) {
 	var interestingIds []int
 
 	var uncachedRequests []jsonrpc.Request
@@ -116,6 +116,11 @@ func (u *Upstream) HandleRequests(requests []jsonrpc.Request) ([]jsonrpc.Respons
 					err = json.Unmarshal(response.Result, &blockInfoParams)
 
 					if err != nil {
+						continue
+					}
+
+					if blockInfoParams.BlockNumber > latestSafeBlock {
+						// we can't cache this, it's not necessarily final
 						continue
 					}
 
