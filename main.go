@@ -109,6 +109,10 @@ func main() {
 
 	<-signals
 
+	if err := db.Close(); err != nil {
+		panic(err)
+	}
+
 	if err := server.Shutdown(nil); err != nil {
 		panic(err)
 	}
