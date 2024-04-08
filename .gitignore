@@ -24,3 +24,7 @@ config.json
 
 .idea/
 data/
+
+# Executables
+BlockFlock
+__debug_bin
