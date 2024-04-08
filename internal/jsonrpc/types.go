@@ -16,7 +16,8 @@ type Request struct {
 type Response struct {
 	Version string          `json:"jsonrpc"`
 	ID      int             `json:"id"`
-	Result  json.RawMessage `json:"result"`
+	Result  json.RawMessage `json:"result,omitempty"`
+	Error   json.RawMessage `json:"error,omitempty"`
 	Single  bool            `json:"-"`
 }
 
