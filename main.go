@@ -26,17 +26,6 @@ var upstreamProvider *upstream.Upstream
 var latestSafeBlock int64
 
 func main() {
-	// get args
-	args := os.Args[1:]
-
-	if len(args) > 0 {
-		if args[0] == "auto" {
-			go CacheOverTime()
-		} else {
-			go GetLatestSafeBlock()
-		}
-	}
-
 	configuration, err = config.LoadConfig("./config.json")
 
 	if err != nil {
@@ -49,12 +38,16 @@ func main() {
 		panic(err)
 	}
 
-	defer func(db *badger.DB) {
-		err := db.Close()
-		if err != nil {
-			panic(err)
+	// get args
+	args := os.Args[1:]
+
+	if len(args) > 0 {
+		if args[0] == "auto" {
+			go CacheOverTime()
+		} else {
+			go GetLatestSafeBlock()
 		}
-	}(db)
+	}
 
 	// Create a new cache
 	cacheProvider := cache.NewBadgerCache(db)
