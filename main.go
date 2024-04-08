@@ -202,7 +202,7 @@ func CacheOverTime() {
 					return err
 				}
 
-				if blockNumber < minBlock {
+				if blockNumber > minBlock && minBlock == blockNumber-1 {
 					minBlock = blockNumber
 				}
 			}
@@ -227,14 +227,15 @@ func CacheOverTime() {
 
 		var i int64
 
-		for i = minBlock; i <= latestSafeBlock; i++ {
+		for i = minBlock + 1; i <= latestSafeBlock; i++ {
 			time.Sleep(time.Millisecond * 100)
 
 			_, err := upstreamProvider.HandleRequests([]jsonrpc.Request{
 				{
-					Method: "blockchain.getBlockInfo",
-					Params: json.RawMessage(fmt.Sprintf(`{"blockNumber":%d}`, i)),
-					Single: true,
+					Version: "2.0",
+					Method:  "blockchain.getBlockInfo",
+					Params:  json.RawMessage(fmt.Sprintf(`{"blockNumber":%d}`, i)),
+					Single:  true,
 				},
 			}, latestSafeBlock)
 
