@@ -22,7 +22,6 @@ go.work
 
 config.json
 
-.idea/
 data/
 
 # Executables

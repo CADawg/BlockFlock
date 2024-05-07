@@ -17,7 +17,9 @@ func JsonGet[T any](url string) (*T, error) {
 		return new(T), err
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 
 	data, err := io.ReadAll(resp.Body)
 
@@ -43,7 +45,9 @@ func JsonPost[T any](url string, data []byte) (*T, error) {
 		return new(T), err
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 
 	data, err = io.ReadAll(resp.Body)
 
