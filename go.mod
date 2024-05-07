@@ -2,6 +2,8 @@ module github.com/CADawg/BlockFlock
 
 go 1.22
 
+toolchain go1.22.3
+
 require (
 	github.com/dgraph-io/badger v1.6.2
 	github.com/goccy/go-json v0.10.2
@@ -15,7 +17,7 @@ require (
 	github.com/golang/glog v1.2.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 )

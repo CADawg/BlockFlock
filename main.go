@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/CADawg/BlockFlock/internal/cache"
 	"github.com/CADawg/BlockFlock/internal/config"
@@ -57,7 +58,7 @@ func main() {
 
 	signals := make(chan os.Signal, 1)
 
-	signal.Notify(signals, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(signals, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	app := http.NewServeMux()
 
@@ -82,6 +83,10 @@ func main() {
 		res.Header().Set("Content-Type", "application/json")
 
 		err = json.NewEncoder(res).Encode(resp)
+
+		if err != nil {
+			SendError(res, 0, err, -69)
+		}
 	})
 
 	app.HandleFunc("OPTIONS /", func(res http.ResponseWriter, req *http.Request) {
@@ -119,7 +124,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := server.Shutdown(nil); err != nil {
+	if err := server.Shutdown(context.TODO()); err != nil {
 		panic(err)
 	}
 
@@ -146,14 +151,25 @@ func HandleRequests(res http.ResponseWriter, req *http.Request, endpoint string)
 
 	if len(responses) == 1 && responses[0].Single {
 		err = json.NewEncoder(res).Encode(responses[0])
+
+		if err != nil {
+			SendError(res, 0, err, -69)
+		}
+
 		return
 	}
 
 	err = json.NewEncoder(res).Encode(responses)
+
+	if err != nil {
+		SendError(res, 0, err, -69)
+	}
 }
 
 func SendError(res http.ResponseWriter, reqId int, err error, code int) {
-	err = json.NewEncoder(res).Encode(jsonrpc.ErrorResponse{
+	// We're sending an error, so there's no point capturing the error here as it means we'd have no way to
+	// display it to the client anyway (as this is the way we display errors to the client)
+	_ = json.NewEncoder(res).Encode(jsonrpc.ErrorResponse{
 		Error: jsonrpc.Error{
 			Code:    code,
 			Message: err.Error(),
@@ -215,7 +231,7 @@ func CacheOverTime() {
 	}
 
 	for {
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Millisecond * 500)
 
 		resp, err := jsonrpc.JsonGet[hive_engine.NodeInfo](configuration.Node)
 
