@@ -1,6 +1,7 @@
 package upstream
 
 import (
+	"errors"
 	"github.com/CADawg/BlockFlock/internal/cache"
 	"github.com/CADawg/BlockFlock/internal/hive_engine"
 	"github.com/CADawg/BlockFlock/internal/jsonrpc"
@@ -101,11 +102,15 @@ func (u *Upstream) HandleRequests(requests []jsonrpc.Request, latestSafeBlock in
 			return nil, err
 		}
 
-		// send all together to parent node
+		// send all together to the parent node
 		responses, err = jsonrpc.JsonPost[[]jsonrpc.Response](u.Node, requestsData)
 
 		if err != nil {
 			return nil, err
+		}
+
+		if responses == nil {
+			return nil, errors.New("no responses")
 		}
 
 		for _, response := range *responses {
