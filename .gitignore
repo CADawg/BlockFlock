@@ -27,3 +27,5 @@ data/
 # Executables
 BlockFlock
 __debug_bin
+
+.env

@@ -7,6 +7,7 @@ toolchain go1.22.3
 require (
 	github.com/dgraph-io/badger v1.6.2
 	github.com/goccy/go-json v0.10.2
+	github.com/joho/godotenv v1.5.1
 )
 
 require (

@@ -11,6 +11,7 @@ import (
 	"github.com/CADawg/BlockFlock/internal/upstream"
 	"github.com/dgraph-io/badger"
 	"github.com/goccy/go-json"
+	_ "github.com/joho/godotenv/autoload"
 	"net/http"
 	"os"
 	"os/signal"
@@ -243,20 +244,28 @@ func CacheOverTime() {
 
 		var i int64
 
-		for i = minBlock + 1; i <= latestSafeBlock; i++ {
-			time.Sleep(time.Millisecond * 100)
+		var latestSafe100 = (latestSafeBlock/100)*100 - 100
 
-			_, err := upstreamProvider.HandleRequests([]jsonrpc.Request{
-				{
+		for i = minBlock + 1; i <= latestSafe100; i += 100 {
+			if !(os.Getenv("NO_RATE_LIMIT") == "true") {
+				time.Sleep(time.Millisecond * 100)
+			}
+
+			var reqs []jsonrpc.Request
+
+			for j := i; j < i+100; j++ {
+				reqs = append(reqs, jsonrpc.Request{
 					Version: "2.0",
 					Method:  "blockchain.getBlockInfo",
-					Params:  json.RawMessage(fmt.Sprintf(`{"blockNumber":%d}`, i)),
-					Single:  true,
-				},
-			}, latestSafeBlock)
+					Params:  json.RawMessage(fmt.Sprintf(`{"blockNumber":%d}`, j)),
+					Single:  false,
+				})
+			}
+
+			_, err := upstreamProvider.HandleRequests(reqs, latestSafeBlock)
 
 			if err != nil {
-				i--
+				i -= 100
 				continue
 			}
 		}
