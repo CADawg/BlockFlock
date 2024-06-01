@@ -2,7 +2,7 @@ package cache
 
 import (
 	"errors"
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v4"
 )
 
 var ErrorKeyNotFound = errors.New("key not found")

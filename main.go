@@ -9,7 +9,8 @@ import (
 	"github.com/CADawg/BlockFlock/internal/jsonrpc"
 	"github.com/CADawg/BlockFlock/internal/normalise"
 	"github.com/CADawg/BlockFlock/internal/upstream"
-	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/v4"
+	"github.com/dgraph-io/badger/v4/options"
 	"github.com/goccy/go-json"
 	_ "github.com/joho/godotenv/autoload"
 	"net/http"
@@ -34,7 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	db, err = badger.Open(badger.DefaultOptions("./data"))
+	db, err = badger.Open(badger.DefaultOptions("./data").WithCompression(options.ZSTD))
 
 	if err != nil {
 		panic(err)
