@@ -35,7 +35,7 @@ func main() {
 		panic(err)
 	}
 
-	db, err = badger.Open(badger.DefaultOptions("./data").WithCompression(options.ZSTD))
+	db, err = badger.Open(badger.DefaultOptions("./data").WithCompression(options.Snappy))
 
 	if err != nil {
 		panic(err)
