@@ -44,6 +44,14 @@ func main() {
 	// get args
 	args := os.Args[1:]
 
+	// clear value log occasionally
+	go func() {
+		for {
+			time.Sleep(time.Minute * 5)
+			_ = db.RunValueLogGC(0.5)
+		}
+	}()
+
 	if len(args) > 0 {
 		if args[0] == "auto" {
 			go CacheOverTime()
