@@ -28,6 +28,9 @@ var err error
 var upstreamProvider *upstream.Upstream
 var latestSafeBlock int64
 
+// OneGigabyte One gig in bytes
+const OneGigabyte = 1073741824
+
 func main() {
 	configuration, err = config.LoadConfig("./config.json")
 
@@ -35,7 +38,8 @@ func main() {
 		panic(err)
 	}
 
-	db, err = badger.Open(badger.DefaultOptions("./data").WithCompression(options.Snappy))
+	// 2gb cache
+	db, err = badger.Open(badger.DefaultOptions("./data").WithCompression(options.Snappy).WithBlockCacheSize(OneGigabyte * 16))
 
 	if err != nil {
 		panic(err)
