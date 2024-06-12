@@ -9,7 +9,7 @@ type Request struct {
 	Version string          `json:"jsonrpc"`
 	ID      int             `json:"id"`
 	Method  string          `json:"method"`
-	Params  json.RawMessage `json:"params"`
+	Params  json.RawMessage `json:"params,omitempty"`
 	Single  bool            `json:"-"`
 }
 
